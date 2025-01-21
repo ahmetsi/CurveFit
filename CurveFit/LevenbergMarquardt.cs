@@ -147,7 +147,7 @@ namespace CurveFit
             double sum = 0;
             foreach (double r in residuals)
             {
-                sum += Math.Pow(r, 2);
+                sum += r * r;
             }
             return sum;
         }
