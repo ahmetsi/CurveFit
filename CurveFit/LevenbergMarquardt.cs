@@ -61,7 +61,7 @@ namespace CurveFit
                         for (int col = 0; col < p; col++)
                             jTj[row, col] += jacobian[i, row] * jacobian[i, col];
 
-                        jTr[row] += jacobian[i, row] * residuals[i];
+                        jTr[row] -= jacobian[i, row] * residuals[i];
                     }
                 }
 
@@ -121,7 +121,7 @@ namespace CurveFit
                 double y1 = model(x, parametersCloned);
                 parametersCloned[i] += eps;
                 double y2 = model(x, parametersCloned);
-                return (y1 - y2) / eps;
+                return (y2 - y1) / eps;
             };
         }
 

@@ -11,16 +11,16 @@ namespace Executer
     {
         static void Main(string[] args)
         {
-            double[] xData = new double[] { 0.1, 1.2, 2.1, 2.9, 4.2, 5.2 };
+            double[] xData = new double[] { 1, 2, 3, 4, 5, 6 };
             double[] yData = new double[] { 7.3, 3.5, 3.0, 2.1, 2.5, 1.6 };
 
-            LMResult result = LevenbergMarquardt.Fit(ExponentialFunction, 3, xData, yData);
+            LMResult result = LevenbergMarquardt.Fit(LinearFunction, 2, xData, yData);
 
         }
 
-        private static double ExponentialFunction(double x, double[] parameters)
+        private static double LinearFunction(double x, double[] parameters)
         {
-            return parameters[0] * Math.Exp(-parameters[1] * x) + parameters[2];
+            return parameters[0] * x + parameters[1];
         }
     }
 }
