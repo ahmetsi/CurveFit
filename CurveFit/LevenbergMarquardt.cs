@@ -41,24 +41,48 @@ namespace CurveFit
             {
                 derivative = CreateDerivative(model, eps);
             }
-
             
-
             LMResult result = new LMResult();
             bool success = false;
 
             int n = xData.Length;
             int p = numParameters;
 
+            double minLambda = 1E-7; // Minimum allowed value for lambda
+            double maxLambda = 1E+6; // Maximum allowed value for lambda
+
             double[] residuals = new double[n];
             double[,] jacobian = new double[n, p];
 
+            double lastError = double.MaxValue;
             int iteration;
             for (iteration = 0; iteration < maxIterations; iteration++)
             {
                 // Compute residuals and Jacobian
                 ComputeResiduals(model, parameters, xData, yData, residuals);
                 ComputeJacobian(derivative, parameters, xData, jacobian);
+
+                double currentError = SumResiduals(residuals);
+
+                // Adjust the damping factor dynamically
+                if (currentError < lastError)
+                {
+                    // Error reduced: Decrease lambda to move towards Gauss-Newton method
+                    lambda = Math.Max(lambda / 10, minLambda);
+                }
+                else
+                {
+                    // Error increased: Increase lambda to move towards gradient descent
+                    lambda = Math.Min(lambda * 10, maxLambda);
+                }
+
+                // Check if progress is bad
+                if (Math.Abs(lastError - currentError) < 1E-8)
+                {
+                    result.Message = "Iterations did not make good progress.";
+                }
+
+                lastError = currentError;
 
                 // Calculate J^T * J (Jacobian transposed times Jacobian) and J^T * r (Jacobian transposed times residuals)
                 double[,] jTj = new double[p, p];
@@ -70,7 +94,7 @@ namespace CurveFit
                         for (int col = 0; col < p; col++)
                             jTj[row, col] += jacobian[i, row] * jacobian[i, col];
 
-                        jTr[row] -= jacobian[i, row] * residuals[i];
+                        jTr[row] += jacobian[i, row] * residuals[i];
                     }
                 }
 
@@ -86,7 +110,7 @@ namespace CurveFit
                 // Update parameters
                 for (int i = 0; i < p; i++)
                 {
-                    parameters[i] += dp[i];
+                    parameters[i] -= dp[i];
                 }
                     
                 // Check for convergence
@@ -99,8 +123,14 @@ namespace CurveFit
                 if (maxUpdate < tolerance)
                 {
                     success = true;
+                    result.Message = "Solution successfully converged.";
                     break;
                 }
+            }
+
+            if (string.IsNullOrEmpty(result.Message))
+            {
+                result.Message = "Maximum number of iterations have been reached.";
             }
 
             result.Success = success;

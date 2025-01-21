@@ -9,6 +9,7 @@ namespace CurveFit
     public class LMResult
     {
         public bool Success { get; set; }
+        public string Message { get; set; }
         public int Iterations { get; set; }
         public double SumResiduals { get; set; }
         public double[] Residuals { get; set; }
@@ -19,9 +20,10 @@ namespace CurveFit
             
         }
 
-        public LMResult(bool success, int iterations, double sumResiduals, double[] residuals, double[] parameters)
+        public LMResult(bool success, string message, int iterations, double sumResiduals, double[] residuals, double[] parameters)
         {
             Success = success;
+            Message = message;
             Iterations = iterations;
             SumResiduals = sumResiduals;
             Residuals = residuals;
