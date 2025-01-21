@@ -25,15 +25,24 @@ namespace CurveFit
                 parameters = (double[])initialParameters.Clone();
             }
 
+            if (maxIterations == 0)
+            {
+                if (derivative == null)
+                {
+                    maxIterations = 200 * (numParameters + 1);
+                }
+                else
+                {
+                    maxIterations = 100 * (numParameters + 1);
+                }
+            }
+
             if (derivative == null)
             {
                 derivative = CreateDerivative(model, eps);
             }
 
-            if (maxIterations == 0)
-            {
-                maxIterations = 100 * (numParameters + 1);
-            }
+            
 
             LMResult result = new LMResult();
             bool success = false;
