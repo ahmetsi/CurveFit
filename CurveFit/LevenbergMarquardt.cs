@@ -134,7 +134,7 @@ namespace CurveFit
             }
 
             result.Success = success;
-            result.Iterations = iteration + 1;
+            result.Iterations = iteration;
             result.SumResiduals = SumResiduals(residuals);
             result.Residuals = residuals;
             result.Parameters = parameters;
