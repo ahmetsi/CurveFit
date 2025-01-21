@@ -9,7 +9,7 @@ namespace CurveFit
     public static class LevenbergMarquardt
     {
         public delegate double FitFunction(double x, double[] parameters); // Function to fit
-        public delegate double FitDerivative(double x, double[] parameters, int i); // Derivative of function wrt i'th parameter
+        public delegate double[] FitDerivative(double x, double[] parameters); // Partial derivatives of the function 
 
         public static LMResult Fit(FitFunction model, int numParameters, double[] xData, double[] yData,
             double[] initialParameters = null, FitDerivative derivative = null, int maxIterations = 0,
@@ -154,13 +154,20 @@ namespace CurveFit
 
         private static FitDerivative CreateDerivative(FitFunction model, double eps)
         {
-            return (x, parameters, i) =>
+            return (x, parameters) =>
             {
                 double[] parametersCloned = (double[])parameters.Clone();
-                double y1 = model(x, parametersCloned);
-                parametersCloned[i] += eps;
-                double y2 = model(x, parametersCloned);
-                return (y2 - y1) / eps;
+                double y1 = model(x, parameters);
+
+                double[] derivatives = new double[parameters.Length];
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    parametersCloned = (double[])parameters.Clone();
+                    parametersCloned[i] += eps;
+                    double y2 = model(x, parametersCloned);
+                    derivatives[i] = (y2 - y1) / eps;
+                }
+                return derivatives;
             };
         }
 
@@ -176,12 +183,13 @@ namespace CurveFit
 
         private static void ComputeJacobian(FitDerivative derivative, double[] parameters, double[] xData, double[,] jacobian)
         {
-            for (int i = 0; i < parameters.Length; i++)
+            for (int i = 0; i < xData.Length; i++)
             {
-                for (int j = 0; j < xData.Length; j++)
+                double x = xData[i];
+                double[] derivatives = derivative(x, parameters);
+                for (int j = 0; j < parameters.Length; j++)
                 {
-                    double x = xData[j];
-                    jacobian[j, i] = derivative(x, parameters, i);
+                    jacobian[i, j] = derivatives[j];
                 }
             }
         }
